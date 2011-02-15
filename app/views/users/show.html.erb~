@@ -1,3 +1,5 @@
-<%= debug(params) if Rails.env.development? %>
-<%= @user.name %>, <%= @user.email %>
+<h1>
+  <%= gravatar_for @user, :size => 30 %>
+  <%= @user.name %>
+</h1>
 
