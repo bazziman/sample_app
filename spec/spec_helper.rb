@@ -29,4 +29,20 @@ RSpec.configure do |config|
     controller.sign_in(user)
   end
 
+  def integration_sign_up(name="", email="", password="", password_confirmation="")
+    visit signup_path
+    fill_in "Name",          :with => name
+    fill_in "Email",         :with => email
+    fill_in "Password",      :with => password
+    fill_in "Confirmation",  :with => password_confirmation
+    click_button
+  end
+
+  def integration_sign_in(user)
+    visit signin_path
+    fill_in :email,    :with => user.email
+    fill_in :password, :with => user.password
+    click_button
+  end
+
 end
