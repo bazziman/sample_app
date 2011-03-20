@@ -19,14 +19,11 @@ describe "Users" do
 
       it "should make a new user" do
         lambda do
-          integration_sign_up("Example User", "user@example.com", "foobar",
-                              "foobar")
-          visit signup_path
-          fill_in "Name",         :with => "Example User"
-          fill_in "Email",        :with => "user@example.com"
-          fill_in "Password",     :with => "foobar"
-          fill_in "Confirmation", :with => "foobar"
-          click_button
+          integration_sign_up({:name => "Example User",
+                               :email => "user@example.com",
+                               :password => "foobar",
+                               :passowrd_confirmation => "foobar"})
+
           response.should have_selector("div.flash.success",
                                         :content => "Welcome")
           response.should render_template('users/show')

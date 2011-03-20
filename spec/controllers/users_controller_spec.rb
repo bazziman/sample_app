@@ -34,6 +34,14 @@ describe UsersController do
       response.should have_selector("h1>img", :class => "gravatar")
     end
 
+    it "should show the user's microposts" do
+      mp1 = Factory(:micropost, :user => @user, :content => "Foo bar")
+      mp2 = Factory(:micropost, :user => @user, :content => "Baz quux")
+      get :show, :id => @user
+      response.should have_selector("span.content", :content => mp1.content)
+      response.should have_selector("span.content", :content => mp2.content)
+    end
+
   end
 
   describe "GET 'new'" do
@@ -272,53 +280,63 @@ describe UsersController do
       it "should deny access" do
         get :index
         response.should redirect_to(signin_path)
-        flash[:notice].should =~ /sign in/i
       end
     end
-
-    describe "for signed-in users" do
+    
+    describe "for signed-in-users" do
 
       before(:each) do
         @user = test_sign_in(Factory(:user))
-        Factory(:user, :email => "another@example.com")
-        Factory(:user, :email => "another@example.net")
         second = Factory(:user, :name => "Bob", :email => "another@example.com")
-        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
-
+        third = Factory(:user, :name => "Ben", :email => "another@example.net")
+        
         30.times do
-          Factory(:user, :email => Factory.next(:email))
           Factory(:user, :name => Factory.next(:name),
-          :email => Factory.next(:email))
+                         :email => Factory.next(:email))
         end
       end
-
+      
       it "should be successful" do
         get :index
         response.should be_success
       end
-
+      
       it "should have the right title" do
         get :index
-        response.should have_selector("title", :content => "All users")
+        response.should have_selector('title', :content => "All users")
       end
-
+      
       it "should have an element for each user" do
         get :index
-        @users[0..2].each do |user|
-          response.should have_selector("li", :content => user.name)
+        User.paginate(:page => 1).each do |user|
+          response.should have_selector('li', :content => user.name)
         end
       end
-
+      
       it "should paginate users" do
         get :index
-        response.should have_selector("div.pagination")
-        response.should have_selector("span.disabled", :content => "Previous")
-        response.should have_selector("a", :href => "/users?page=2",
+        response.should have_selector('div.pagination')
+        response.should have_selector('span.disabled', :content => "Previous")
+        response.should have_selector('a', :href => "/users?page=2",
                                            :content => "2")
-        response.should have_selector("a", :href => "/users?page=2",
+        response.should have_selector('a', :href => "/users?page=2",
                                            :content => "Next")
       end
+      
+      it "should have delete links for admins" do
+        @user.toggle!(:admin)
+        other_user = User.all.second
+        get :index
+        response.should have_selector('a', :href => user_path(other_user),
+                                           :content => "delete")
+      end
 
+      it "should not have delete links for non-admins" do
+        other_user = User.all.second
+        get :index
+        response.should_not have_selector('a', :href => user_path(other_user),
+                                               :content => "delete")
+      end
     end
   end
 

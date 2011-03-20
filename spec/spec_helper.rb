@@ -8,6 +8,27 @@ require 'rspec/rails'
 Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
 RSpec.configure do |config|
+
+  def test_sign_in(user)
+    controller.sign_in(user)
+  end
+
+  def integration_sign_in(user)
+    visit signin_path
+    fill_in :email,    :with => user.email
+    fill_in :password, :with => user.password
+    click_button
+  end
+
+  def integration_sign_up(fields={})
+    visit signup_url
+    fill_in :name, :with => fields[:name]
+    fill_in :email, :with => fields[:email]
+    fill_in :password, :with => fields[:password]
+    fill_in :confirmation, :with => fields[:password_confirmation]
+    click_button
+  end
+
   # == Mock Framework
   #
   # If you prefer to use mocha, flexmock or RR, uncomment the appropriate line:
@@ -24,25 +45,5 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   config.use_transactional_fixtures = true
-
-  def test_sign_in(user)
-    controller.sign_in(user)
-  end
-
-  def integration_sign_up(name="", email="", password="", password_confirmation="")
-    visit signup_path
-    fill_in "Name",          :with => name
-    fill_in "Email",         :with => email
-    fill_in "Password",      :with => password
-    fill_in "Confirmation",  :with => password_confirmation
-    click_button
-  end
-
-  def integration_sign_in(user)
-    visit signin_path
-    fill_in :email,    :with => user.email
-    fill_in :password, :with => user.password
-    click_button
-  end
-
 end
+
